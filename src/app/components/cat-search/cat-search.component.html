@@ -1,0 +1,65 @@
+<header class="header">
+  <form [formGroup]="form" class="search-form">
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-control">
+        <mat-label>Select Breed</mat-label>
+        <mat-select formControlName="breed" required>
+          <mat-option *ngFor="let breed of (combined$ | async)?.[0]" [value]="breed.id">
+            {{ breed.name }}
+          </mat-option>
+        </mat-select>
+        <mat-hint>Select a breed to see cats</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-control">
+        <mat-label>Number of Results</mat-label>
+        <input matInput type="number" formControlName="limit" min="1" max="50" required />
+        <mat-hint>Choose between 1 and 50</mat-hint>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" class="search-button" (click)="search()" [disabled]="form.invalid">
+        Search
+      </button>
+    </div>
+  </form>
+</header>
+
+<div class="cat-search-container">
+  <div *ngIf="!searchPerformed">
+    <h3>Find your favorite cat!</h3>
+  </div>
+
+  <div *ngIf="(combined$ | async)?.[2]" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading cats... Please wait.</p>
+  </div>
+
+  <div *ngIf="(combined$ | async)?.[3] as error" class="error-message">
+    <mat-icon color="warn">error_outline</mat-icon> {{ error }}. Please try again later.
+  </div>
+
+  <div *ngIf="searchPerformed && !(combined$ | async)?.[2]">
+    <div *ngIf="(combined$ | async)?.[1] as cats">
+      <h3 *ngIf="cats.length > 0">
+        Found {{ cats.length }} {{ cats.length === 1 ? 'item' : 'items' }} for the selected breed: {{ selectedBreed?.name }}
+      </h3>
+
+      <div *ngIf="cats.length === 0">
+        <p>No cats found for the selected breed: {{ selectedBreed?.name }}.</p>
+      </div>
+
+      <div class="cat-grid" *ngIf="cats.length > 0">
+        <mat-card *ngFor="let cat of cats" class="cat-card">
+          <img mat-card-image [src]="cat?.url" *ngIf="cat?.url" alt="cat image" />
+          <mat-card-content>
+            <p class="cat-info" *ngIf="cat?.breeds && cat.breeds.length > 0">
+              Breed Name: {{ cat.breeds[0].name }}
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+
+</div>
+
